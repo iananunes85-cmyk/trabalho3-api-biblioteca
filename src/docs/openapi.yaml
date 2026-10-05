@@ -1,0 +1,807 @@
+openapi: 3.0.3
+
+info:
+  title: API Biblioteca Escolar
+  description: API REST para gerenciamento de livros, estudantes, categorias e empréstimos.
+  version: 2.0.0
+
+servers:
+  - url: http://localhost:3000
+
+tags:
+  - name: Livros
+    description: Operações relacionadas aos livros
+  - name: Estudantes
+    description: Operações relacionadas aos estudantes
+  - name: Categorias
+    description: Operações relacionadas às categorias
+  - name: Empréstimos
+    description: Operações relacionadas aos empréstimos
+
+
+paths:
+
+  # ==========================================================
+  # LIVROS
+  # ==========================================================
+
+  /livros:
+    get:
+      tags:
+        - Livros
+      summary: Lista os livros
+      parameters:
+        - name: genero
+          in: query
+          required: false
+          description: Filtra os livros por gênero
+          schema:
+            type: string
+          example: Romance
+
+        - name: busca
+          in: query
+          required: false
+          description: Pesquisa por título ou autor
+          schema:
+            type: string
+          example: Machado
+
+        - name: page
+          in: query
+          required: false
+          description: Número da página
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          example: 1
+
+        - name: limit
+          in: query
+          required: false
+          description: Quantidade de registros por página
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+          example: 3
+
+        - name: ordenarPor
+          in: query
+          required: false
+          description: Campo utilizado para ordenação
+          schema:
+            type: string
+            enum:
+              - id
+              - titulo
+              - autor
+              - genero
+              - ano
+            default: id
+          example: ano
+
+        - name: ordem
+          in: query
+          required: false
+          description: Direção da ordenação
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+          example: desc
+
+      responses:
+        "200":
+          description: Lista de livros retornada com sucesso
+          content:
+            application/json:
+              example:
+                dados:
+                  - id: 1
+                    titulo: Dom Casmurro
+                    autor: Machado de Assis
+                    genero: Romance
+                    ano: 1899
+                    exemplaresDisponiveis: 3
+                    created_at: "2026-09-20T18:41:12.762Z"
+                    updated_at: "2026-09-20T18:41:12.762Z"
+                paginacao:
+                  pagina: 1
+                  limite: 10
+                  total: 10
+                  totalPaginas: 1
+
+    post:
+      tags:
+        - Livros
+      summary: Cria um novo livro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              titulo: A Hora da Estrela
+              autor: Clarice Lispector
+              genero: Romance
+              ano: 1977
+              exemplaresDisponiveis: 2
+
+      responses:
+        "201":
+          description: Livro criado com sucesso
+          content:
+            application/json:
+              example:
+                id: 11
+                titulo: A Hora da Estrela
+                autor: Clarice Lispector
+                genero: Romance
+                ano: 1977
+                exemplaresDisponiveis: 2
+
+        "400":
+          description: Dados inválidos
+
+
+  /livros/{id}:
+    get:
+      tags:
+        - Livros
+      summary: Busca um livro pelo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "200":
+          description: Livro encontrado
+          content:
+            application/json:
+              example:
+                id: 1
+                titulo: Dom Casmurro
+                autor: Machado de Assis
+                genero: Romance
+                ano: 1899
+                exemplaresDisponiveis: 3
+
+        "404":
+          description: Livro não encontrado
+
+    put:
+      tags:
+        - Livros
+      summary: Atualiza completamente um livro
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              titulo: Dom Casmurro - Nova Edição
+              autor: Machado de Assis
+              genero: Romance
+              ano: 1899
+              exemplaresDisponiveis: 3
+
+      responses:
+        "200":
+          description: Livro atualizado com sucesso
+
+        "404":
+          description: Livro não encontrado
+
+    patch:
+      tags:
+        - Livros
+      summary: Atualiza parcialmente um livro
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              exemplaresDisponiveis: 5
+
+      responses:
+        "200":
+          description: Livro atualizado parcialmente
+
+        "400":
+          description: Dados inválidos
+
+        "404":
+          description: Livro não encontrado
+
+    delete:
+      tags:
+        - Livros
+      summary: Exclui um livro
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "204":
+          description: Livro excluído com sucesso
+
+        "404":
+          description: Livro não encontrado
+
+        "409":
+          description: Não é possível excluir livro com empréstimos relacionados
+
+
+  /livros/{id}/relacionamentos:
+    get:
+      tags:
+        - Livros
+      summary: Busca livro com categorias e empréstimos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "200":
+          description: Livro e seus relacionamentos retornados com sucesso
+          content:
+            application/json:
+              example:
+                id: 1
+                titulo: Dom Casmurro
+                autor: Machado de Assis
+                genero: Romance
+                ano: 1899
+                exemplaresDisponiveis: 3
+                categorias:
+                  - livroId: 1
+                    categoriaId: 1
+                    categoria:
+                      id: 1
+                      nome: Romance
+                emprestimos:
+                  - id: 1
+                    livroId: 1
+                    estudanteId: 1
+
+        "404":
+          description: Livro não encontrado
+
+
+  # ==========================================================
+  # ESTUDANTES
+  # ==========================================================
+
+  /estudantes:
+    get:
+      tags:
+        - Estudantes
+      summary: Lista os estudantes
+      responses:
+        "200":
+          description: Lista de estudantes retornada com sucesso
+          content:
+            application/json:
+              example:
+                - id: 1
+                  nome: Ana Silva
+                  email: ana@email.com
+                - id: 2
+                  nome: Bruno Santos
+                  email: bruno@email.com
+
+    post:
+      tags:
+        - Estudantes
+      summary: Cria um novo estudante
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              nome: Maria Oliveira
+              email: maria@email.com
+
+      responses:
+        "201":
+          description: Estudante criado com sucesso
+
+        "400":
+          description: Dados inválidos
+
+        "409":
+          description: E-mail já cadastrado
+
+
+  /estudantes/{id}:
+    get:
+      tags:
+        - Estudantes
+      summary: Busca um estudante pelo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "200":
+          description: Estudante encontrado
+
+        "404":
+          description: Estudante não encontrado
+
+    put:
+      tags:
+        - Estudantes
+      summary: Atualiza completamente um estudante
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              nome: Ana Silva Atualizada
+              email: ana.nova@email.com
+
+      responses:
+        "200":
+          description: Estudante atualizado com sucesso
+
+        "404":
+          description: Estudante não encontrado
+
+        "409":
+          description: E-mail já cadastrado
+
+    patch:
+      tags:
+        - Estudantes
+      summary: Atualiza parcialmente um estudante
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              nome: Ana Silva
+
+      responses:
+        "200":
+          description: Estudante atualizado parcialmente
+
+        "404":
+          description: Estudante não encontrado
+
+        "409":
+          description: E-mail já cadastrado
+
+    delete:
+      tags:
+        - Estudantes
+      summary: Exclui um estudante
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "204":
+          description: Estudante excluído com sucesso
+
+        "404":
+          description: Estudante não encontrado
+
+        "409":
+          description: Não é possível excluir estudante com empréstimos relacionados
+
+
+  # ==========================================================
+  # CATEGORIAS
+  # ==========================================================
+
+  /categorias:
+    get:
+      tags:
+        - Categorias
+      summary: Lista as categorias
+      responses:
+        "200":
+          description: Lista de categorias retornada com sucesso
+          content:
+            application/json:
+              example:
+                - id: 1
+                  nome: Romance
+                  created_at: "2026-09-20T18:41:12.525Z"
+                  updated_at: "2026-09-20T18:41:12.525Z"
+
+    post:
+      tags:
+        - Categorias
+      summary: Cria uma nova categoria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              nome: Tecnologia
+
+      responses:
+        "201":
+          description: Categoria criada com sucesso
+          content:
+            application/json:
+              example:
+                id: 11
+                nome: Tecnologia
+
+        "400":
+          description: Dados inválidos
+
+        "409":
+          description: Categoria já cadastrada
+
+
+  /categorias/{id}:
+    get:
+      tags:
+        - Categorias
+      summary: Busca uma categoria pelo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "200":
+          description: Categoria encontrada
+
+        "404":
+          description: Categoria não encontrada
+
+    put:
+      tags:
+        - Categorias
+      summary: Atualiza completamente uma categoria
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              nome: Literatura Brasileira
+
+      responses:
+        "200":
+          description: Categoria atualizada com sucesso
+
+        "400":
+          description: Dados inválidos
+
+        "404":
+          description: Categoria não encontrada
+
+        "409":
+          description: Categoria já cadastrada
+
+    patch:
+      tags:
+        - Categorias
+      summary: Atualiza parcialmente uma categoria
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              nome: Literatura Brasileira
+
+      responses:
+        "200":
+          description: Categoria atualizada parcialmente
+
+        "400":
+          description: Dados inválidos
+
+        "404":
+          description: Categoria não encontrada
+
+        "409":
+          description: Categoria já cadastrada
+
+    delete:
+      tags:
+        - Categorias
+      summary: Exclui uma categoria
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "204":
+          description: Categoria excluída com sucesso
+
+        "404":
+          description: Categoria não encontrada
+
+        "409":
+          description: Não é possível excluir categoria com livros relacionados
+
+
+  /categorias/{id}/livros:
+    get:
+      tags:
+        - Categorias
+      summary: Busca uma categoria com seus livros relacionados
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "200":
+          description: Categoria e livros relacionados retornados com sucesso
+          content:
+            application/json:
+              example:
+                id: 1
+                nome: Romance
+                livros:
+                  - livroId: 1
+                    categoriaId: 1
+                    livro:
+                      id: 1
+                      titulo: Dom Casmurro
+                      autor: Machado de Assis
+                      genero: Romance
+                      ano: 1899
+                      exemplaresDisponiveis: 3
+
+        "404":
+          description: Categoria não encontrada
+
+
+  # ==========================================================
+  # EMPRÉSTIMOS
+  # ==========================================================
+
+  /emprestimos:
+    get:
+      tags:
+        - Empréstimos
+      summary: Lista os empréstimos
+      responses:
+        "200":
+          description: Lista de empréstimos retornada com sucesso
+          content:
+            application/json:
+              example:
+                - id: 1
+                  livroId: 1
+                  livro: Dom Casmurro
+                  estudanteId: 1
+                  estudante: Ana Silva
+                  dataEmprestimo: "2026-09-20T18:41:12.900Z"
+
+    post:
+      tags:
+        - Empréstimos
+      summary: Cria um novo empréstimo
+      description: >
+        Cria o empréstimo e reduz em uma unidade a quantidade de exemplares
+        disponíveis do livro utilizando uma transação.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              livroId: 1
+              estudanteId: 1
+
+      responses:
+        "201":
+          description: Empréstimo criado com sucesso
+
+        "404":
+          description: Livro ou estudante não encontrado
+
+        "409":
+          description: Não há exemplares disponíveis
+
+
+  /emprestimos/{id}:
+    get:
+      tags:
+        - Empréstimos
+      summary: Busca um empréstimo pelo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "200":
+          description: Empréstimo encontrado
+
+        "404":
+          description: Empréstimo não encontrado
+
+    put:
+      tags:
+        - Empréstimos
+      summary: Atualiza completamente um empréstimo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              livroId: 2
+              estudanteId: 2
+              dataEmprestimo: "2026-09-20"
+
+      responses:
+        "200":
+          description: Empréstimo atualizado com sucesso
+
+        "404":
+          description: Empréstimo, livro ou estudante não encontrado
+
+    patch:
+      tags:
+        - Empréstimos
+      summary: Atualiza parcialmente um empréstimo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              estudanteId: 2
+
+      responses:
+        "200":
+          description: Empréstimo atualizado parcialmente
+
+        "404":
+          description: Empréstimo, livro ou estudante não encontrado
+
+    delete:
+      tags:
+        - Empréstimos
+      summary: Exclui um empréstimo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "204":
+          description: Empréstimo excluído com sucesso
+
+        "404":
+          description: Empréstimo não encontrado
+
+
+  /estudantes/{id}/emprestimos:
+    get:
+      tags:
+        - Empréstimos
+      summary: Lista os empréstimos de um estudante
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+
+      responses:
+        "200":
+          description: Empréstimos do estudante retornados com sucesso
+          content:
+            application/json:
+              example:
+                - id: 1
+                  livroId: 1
+                  livro: Dom Casmurro
+                  estudanteId: 1
+                  estudante: Ana Silva
+                  dataEmprestimo: "2026-09-20T18:41:12.900Z"
+
+        "404":
+          description: Estudante não encontrado
