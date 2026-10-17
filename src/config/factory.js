@@ -1,3 +1,4 @@
+
 const criarLivrosRepository =
   require("../repositories/livros.repository");
 
@@ -22,7 +23,7 @@ const criarEmprestimosService =
 const criarCategoriasService =
   require("../services/categorias.service");
 
-function criarDependencias(prisma) {
+function criarDependencias(prisma, publicadorEventos) {
   const livrosRepository =
     criarLivrosRepository(prisma);
 
@@ -46,7 +47,10 @@ function criarDependencias(prisma) {
     },
 
     services: {
-      livros: criarLivrosService(livrosRepository),
+      livros: criarLivrosService(
+        livrosRepository,
+        publicadorEventos
+      ),
 
       estudantes:
         criarEstudantesService(estudantesRepository),

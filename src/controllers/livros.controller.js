@@ -1,5 +1,14 @@
+
 const livrosService =
   require("../config/dependencias").services.livros;
+
+function emitirEvento(req, evento, dados) {
+  const io = req.app.get("io");
+
+  if (io) {
+    io.to("livros").emit(evento, dados);
+  }
+}
 
 async function listarLivros(req, res, next) {
   try {
@@ -52,6 +61,8 @@ async function criarLivro(req, res, next) {
     const novoLivro =
       await livrosService.criarLivro(req.body);
 
+    emitirEvento(req, "livro-criado", novoLivro);
+
     res.status(201).json(novoLivro);
   } catch (erro) {
     next(erro);
@@ -63,10 +74,13 @@ async function atualizarLivro(req, res, next) {
     const id = Number(req.params.id);
 
     const livroAtualizado =
-      await livrosService.atualizarLivro(
-        id,
-        req.body
-      );
+      await livrosService.atualizarLivro(id, req.body);
+
+    emitirEvento(
+      req,
+      "livro-atualizado",
+      livroAtualizado
+    );
 
     res.status(200).json(livroAtualizado);
   } catch (erro) {
@@ -88,6 +102,12 @@ async function atualizarParcialmenteLivro(
         req.body
       );
 
+    emitirEvento(
+      req,
+      "livro-atualizado",
+      livroAtualizado
+    );
+
     res.status(200).json(livroAtualizado);
   } catch (erro) {
     next(erro);
@@ -99,6 +119,8 @@ async function excluirLivro(req, res, next) {
     const id = Number(req.params.id);
 
     await livrosService.excluirLivro(id);
+
+    emitirEvento(req, "livro-excluido", { id });
 
     res.status(204).send();
   } catch (erro) {

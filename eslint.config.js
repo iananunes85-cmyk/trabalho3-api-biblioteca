@@ -1,3 +1,4 @@
+
 const globals = require("globals");
 const js = require("@eslint/js");
 
@@ -12,7 +13,7 @@ module.exports = [
   js.configs.recommended,
 
   {
-    files: ["src/**/*.js"],
+    files: ["src/**/*.js", "tests/**/*.js"],
 
     languageOptions: {
       ecmaVersion: "latest",
