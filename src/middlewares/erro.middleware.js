@@ -1,6 +1,6 @@
 // Middleware centralizado de tratamento de erros
 
-function tratarErro(err, req, res) {
+function tratarErro(err, req, res, next) {
   console.error(err);
 
   // Erros de negócio
