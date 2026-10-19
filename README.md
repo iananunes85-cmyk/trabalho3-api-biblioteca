@@ -1,10 +1,10 @@
 
 
-\# Biblioteca Digital — Aplicação em Tempo Real
+# Biblioteca Digital — Aplicação em Tempo Real
 
 
 
-\## Sobre o projeto
+## Sobre o projeto
 
 
 
@@ -16,59 +16,59 @@ A aplicação integra uma API REST documentada, uma interface web e comunicaçã
 
 
 
-\## Tecnologias utilizadas
+## Tecnologias utilizadas
 
 
 
-\- Node.js e Express
+- Node.js e Express
 
-\- React e Vite
+- React e Vite
 
-\- Prisma ORM
+- Prisma ORM
 
-\- SQLite
+- SQLite
 
-\- Socket.IO
+- Socket.IO
 
-\- OpenAPI e Swagger UI
+- OpenAPI e Swagger UI
 
-\- Docker e Docker Compose
-
-
-
-\## Funcionalidades
+- Docker e Docker Compose
 
 
 
-\- Consulta, cadastro, atualização e exclusão de livros pela API.
-
-\- Gerenciamento de estudantes, empréstimos e categorias.
-
-\- Validação de dados e tratamento de erros.
-
-\- Paginação, filtros e ordenação na listagem de livros.
-
-\- Documentação da API com Swagger.
-
-\- Comunicação em tempo real por meio do Socket.IO.
-
-\- Atualização da interface quando livros são cadastrados, atualizados ou excluídos.
-
-\- Persistência dos dados em banco SQLite.
+## Funcionalidades
 
 
 
-\## Requisitos
+- Consulta, cadastro, atualização e exclusão de livros pela API.
+
+- Gerenciamento de estudantes, empréstimos e categorias.
+
+- Validação de dados e tratamento de erros.
+
+- Paginação, filtros e ordenação na listagem de livros.
+
+- Documentação da API com Swagger.
+
+- Comunicação em tempo real por meio do Socket.IO.
+
+- Atualização da interface quando livros são cadastrados, atualizados ou excluídos.
+
+- Persistência dos dados em banco SQLite.
 
 
 
-\- Docker instalado e em execução.
-
-\- Docker Compose disponível.
+## Requisitos
 
 
 
-\## Como executar com Docker
+- Docker instalado e em execução.
+
+- Docker Compose disponível.
+
+
+
+## Como executar com Docker
 
 
 
@@ -108,19 +108,19 @@ docker compose ps
 
 
 
-\## Acessos
+## Acessos
 
 
 
-\- \*\*Interface web:\*\* http://localhost:3000
+- **Interface web:** http://localhost:3000
 
-\- \*\*Documentação da API:\*\* http://localhost:3000/docs
+- **Documentação da API:** http://localhost:3000/docs
 
-\- \*\*Verificação de saúde:\*\* http://localhost:3000/health
+- **Verificação de saúde:** http://localhost:3000/health
 
 
 
-\## Banco de dados e persistência
+## Banco de dados e persistência
 
 
 
@@ -152,11 +152,11 @@ docker compose exec biblioteca npm run seed
 
 
 
-\*\*Atenção:\*\* não execute o seed no banco com dados que deseja preservar.
+**Atenção:** não execute o seed no banco com dados que deseja preservar.
 
 
 
-\## Testes realizados
+## Testes realizados
 
 
 
@@ -168,17 +168,17 @@ O endpoint `/health` foi testado, e a aplicação foi executada com o usuário s
 
 
 
-\## Repositórios
+## Repositórios
 
 
 
-\- \*\*Backend/API:\*\* https://github.com/iananunes85-cmyk/trabalho3-api-biblioteca
+- **Backend/API:** https://github.com/iananunes85-cmyk/trabalho3-api-biblioteca
 
-\- \*\*Frontend:\*\* https://github.com/iananunes85-cmyk/biblioteca-digital
+- **Frontend:** https://github.com/iananunes85-cmyk/biblioteca-digital
 
 
 
-\## Considerações finais
+## Considerações finais
 
 
 

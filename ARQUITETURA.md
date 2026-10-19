@@ -18,61 +18,31 @@ A aplicação permite gerenciar livros, estudantes, empréstimos e categorias. T
 
 
 
-```text
+```mermaid
 
-Interface React
+flowchart TD
 
-&#x20;     |
+&#x20;   A\[Interface React] --> B\[API REST - Express]
 
-&#x20;     v
+&#x20;   B --> C\[Routes]
 
-API REST - Express
+&#x20;   C --> D\[Middlewares]
 
-&#x20;     |
+&#x20;   D --> E\[Controllers]
 
-&#x20;     v
+&#x20;   E --> F\[Services]
 
-&#x20;   Routes
+&#x20;   F --> G\[Repositories]
 
-&#x20;     |
+&#x20;   G --> H\[Prisma ORM]
 
-&#x20;     v
+&#x20;   H --> I\[(Banco de dados SQLite)]
 
-&#x20; Controllers
+&#x20;   E --> J\[Socket.IO]
 
-&#x20;     |
+&#x20;   J --> K\[Salas e eventos em tempo real]
 
-&#x20;     v
-
-&#x20;  Services
-
-&#x20;     |
-
-&#x20;     v
-
-&#x20;Repositories
-
-&#x20;     |
-
-&#x20;     v
-
-&#x20;  Prisma ORM
-
-&#x20;     |
-
-&#x20;     v
-
-&#x20;   SQLite
-
-
-
-Servidor HTTP + Socket.IO
-
-&#x20;     |
-
-&#x20;     v
-
-Salas e eventos em tempo real
+&#x20;   K --> A
 
 ```
 
@@ -82,21 +52,23 @@ Salas e eventos em tempo real
 
 
 
-- **Interface:** apresenta os livros e envia requisições à API. Também recebe eventos do Socket.IO para atualizar a lista em tempo real.
+\- \*\*Interface React:\*\* apresenta os livros, envia requisições à API e recebe eventos do Socket.IO para atualizar a lista em tempo real.
 
-- **Routes:** define os endpoints e encaminha as requisições aos controllers, com as validações configuradas.
+\- \*\*Routes:\*\* define os endpoints e encaminha as requisições aos controllers.
 
-- **Controllers:** recebem as requisições HTTP, acionam os serviços e retornam as respostas. Nas operações de livros, também publicam eventos após operações bem-sucedidas.
+\- \*\*Middlewares:\*\* executa validações e auxilia no tratamento das requisições e dos erros.
 
-- **Services:** concentram as operações e regras de negócio da aplicação.
+\- \*\*Controllers:\*\* recebem as requisições HTTP, acionam os serviços e retornam as respostas. Nas operações de livros, também publicam eventos após operações bem-sucedidas.
 
-- **Repositories:** isolam o acesso aos dados e organizam as consultas e operações realizadas no banco.
+\- \*\*Services:\*\* concentram as operações e regras de negócio da aplicação.
 
-- **Prisma ORM:** realiza o acesso ao banco de dados SQLite.
+\- \*\*Repositories:\*\* isolam o acesso aos dados e organizam as consultas e operações realizadas no banco.
 
-- **Socket.IO:** mantém a comunicação em tempo real entre o servidor e os clientes conectados.
+\- \*\*Prisma ORM:\*\* realiza o acesso ao banco de dados SQLite.
 
-- **Docker:** permite empacotar e executar a aplicação em um ambiente controlado.
+\- \*\*Socket.IO:\*\* mantém a comunicação em tempo real entre o servidor e os clientes conectados.
+
+\- \*\*Docker:\*\* permite empacotar e executar a aplicação em um ambiente controlado.
 
 
 
@@ -104,7 +76,7 @@ Salas e eventos em tempo real
 
 
 
-Em uma operação REST, a interface envia uma requisição ao servidor. A rota recebe a chamada, executa as validações configuradas e encaminha a operação ao controller. O controller aciona o serviço, que utiliza o repositório para consultar ou alterar os dados no banco. Em seguida, a resposta retorna à interface.
+Em uma operação REST, a interface envia uma requisição ao servidor. A rota recebe a chamada e encaminha a operação ao controller, passando pelas validações configuradas. O controller aciona o serviço, que utiliza o repositório para consultar ou alterar os dados no banco. Em seguida, a resposta retorna à interface.
 
 
 
@@ -116,7 +88,7 @@ Nas operações de criação, atualização e exclusão de livros, o controller 
 
 
 
-### Repository
+### 4.1 Repository
 
 
 
@@ -128,7 +100,7 @@ Essa organização facilita a manutenção e reduz a dependência direta das cam
 
 
 
-### Injeção de dependência
+### 4.2 Injeção de dependência e Factory
 
 
 
@@ -136,11 +108,11 @@ A aplicação utiliza uma fábrica de dependências, definida em `src/config/fac
 
 
 
-Essa organização permite fornecer os componentes necessários às demais camadas e contribui para reduzir o acoplamento entre elas.
+Essa organização centraliza a criação dos componentes e facilita a manutenção e a substituição de dependências.
 
 
 
-### Comunicação por eventos
+### 4.3 Comunicação por eventos
 
 
 
@@ -148,7 +120,7 @@ A aplicação utiliza eventos do Socket.IO para comunicar alterações realizada
 
 
 
-Esse mecanismo permite que diferentes clientes reajam às alterações sem depender de consultas repetidas à API. Embora apresente características de comunicação desacoplada, sua implementação deve ser distinguida do padrão Observer formalmente aplicado por meio de uma estrutura de observadores.
+Esse mecanismo permite que diferentes clientes reajam às alterações sem depender de consultas repetidas à API. A comunicação apresenta características de desacoplamento por eventos, mas não deve ser confundida com uma implementação formal do padrão Observer.
 
 
 
@@ -160,11 +132,27 @@ O servidor HTTP é integrado ao Socket.IO. Os clientes podem entrar nas salas `l
 
 
 
-A aplicação utiliza os eventos `livro-criado`, `livro-atualizado` e `livro-excluido` para sincronizar as alterações de livros entre os clientes conectados. Também possui os eventos `entrar-sala`, `sair-sala`, `erro-sala`, `entrou-sala` e `saiu-sala` para gerenciar a participação nas salas.
+Os principais eventos de atualização dos livros são:
 
 
 
-O servidor valida os nomes das salas recebidos dos clientes e registra as conexões e desconexões. O cliente também possui tratamento para perda e restabelecimento da conexão.
+| Evento | Payload | Finalidade |
+
+|---|---|---|
+
+| `livro-criado` | Objeto do livro criado | Informa o cadastro de um livro. |
+
+| `livro-atualizado` | Objeto do livro atualizado | Comunica alterações nos dados de um livro. |
+
+| `livro-excluido` | Objeto com o campo `id` | Informa qual livro foi excluído. |
+
+
+
+Para gerenciar as salas, são utilizados os eventos `entrar-sala`, `sair-sala`, `erro-sala`, `entrou-sala` e `saiu-sala`. O servidor valida os nomes das salas recebidos dos clientes e registra conexões e desconexões.
+
+
+
+O cliente possui tratamento para perda e restabelecimento da conexão. Os eventos de alteração de livros são transmitidos aos clientes que participam da sala `livros`.
 
 
 
@@ -184,6 +172,10 @@ O endpoint `/health` permite verificar a disponibilidade do servidor. O contêin
 
 
 
+As migrations pendentes são aplicadas durante a inicialização do contêiner. O banco é mantido no volume persistente, evitando que a recriação do contêiner, por si só, apague os dados armazenados.
+
+
+
 ## 7. Decisões arquiteturais (ADRs)
 
 
@@ -192,15 +184,15 @@ O endpoint `/health` permite verificar a disponibilidade do servidor. O contêin
 
 
 
-**Contexto:** a aplicação precisa persistir os dados da biblioteca em um banco relacional.
+\*\*Contexto:\*\* a aplicação precisa persistir os dados da biblioteca em um banco relacional.
 
 
 
-**Decisão:** utilizar SQLite com Prisma ORM.
+\*\*Decisão:\*\* utilizar SQLite com Prisma ORM.
 
 
 
-**Consequências:** a configuração e a execução são simplificadas, mas é necessário gerenciar adequadamente o arquivo do banco e o volume persistente.
+\*\*Consequências:\*\* a configuração e a execução são simplificadas, mas é necessário gerenciar adequadamente o arquivo do banco e o volume persistente.
 
 
 
@@ -208,15 +200,15 @@ O endpoint `/health` permite verificar a disponibilidade do servidor. O contêin
 
 
 
-**Contexto:** as alterações realizadas por um cliente precisam ser refletidas nos demais clientes conectados.
+\*\*Contexto:\*\* as alterações realizadas por um cliente precisam ser refletidas nos demais clientes conectados.
 
 
 
-**Decisão:** utilizar Socket.IO com salas e eventos específicos para as operações de livros.
+\*\*Decisão:\*\* utilizar Socket.IO com salas e eventos específicos para as operações de livros.
 
 
 
-**Consequências:** a interface recebe atualizações sem recarregar a página, mas o servidor precisa validar as mensagens recebidas e gerenciar as conexões.
+\*\*Consequências:\*\* a interface recebe atualizações sem recarregar a página, mas o servidor precisa validar as mensagens recebidas e gerenciar as conexões.
 
 
 
