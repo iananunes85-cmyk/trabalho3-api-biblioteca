@@ -1,0 +1,9 @@
+node_modules
+.git
+.env
+biblioteca.db
+prisma/biblioteca-backup.db
+npm-debug.log
+coverage
+prisma/biblioteca.db
+data/

@@ -6,3 +6,8 @@ prisma/biblioteca.db
 .claude/
 .cursor/
 .devin/
+# Arquivos de banco de dados e backups
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
